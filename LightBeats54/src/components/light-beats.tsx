@@ -12,8 +12,8 @@ import { useFlashlightControl } from '@/hooks/use-flashlight-control';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
-const THRESHOLD = 0.2; 
-const BEAT_THRESHOLD = 0.5; 
+
+const BEAT_THRESHOLD = 0.7; 
 
 export function LightBeats() {
   const { amplitude, isListening, error, startListening, stopListening } =
