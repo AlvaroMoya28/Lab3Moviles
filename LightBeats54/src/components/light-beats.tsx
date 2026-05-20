@@ -7,27 +7,26 @@ import {
   Platform,
 } from 'react-native';
 import { CameraView } from 'expo-camera';
+import Slider from '@react-native-community/slider';
 import { useAudioAnalyzer } from '@/hooks/use-audio-analyzer';
 import { useFlashlightControl } from '@/hooks/use-flashlight-control';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
-
-const BEAT_THRESHOLD = 0.7; 
+const THRESHOLD = 0.2;
 
 export function LightBeats() {
   const { amplitude, isListening, error, startListening, stopListening } =
     useAudioAnalyzer();
-  const {
-    isFlashlightOn,
-    requestCameraPermission,
-    updateFlashlightByAmplitude,
-  } = useFlashlightControl();
+  const { isFlashlightOn, requestCameraPermission, updateFlashlightByAmplitude } =
+    useFlashlightControl();
 
   const [isStarted, setIsStarted] = useState(false);
   const [cameraHasPermission, setCameraHasPermission] = useState(false);
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
   const opacityAnim = React.useRef(new Animated.Value(0.5)).current;
+  const [beatPercent, setBeatPercent] = useState(50);
+  const BEAT_THRESHOLD = beatPercent / 100;
 
   // Inicializar permisos
   useEffect(() => {
@@ -146,6 +145,22 @@ export function LightBeats() {
           <ThemedText style={styles.amplitudeText}>
             Amplitud: {(amplitude * 100).toFixed(0)}%
           </ThemedText>
+
+          <ThemedText style={styles.amplitudeText}>
+            Umbral: {beatPercent}%
+          </ThemedText>
+
+          <Slider
+            style={styles.slider}
+            minimumValue={0}
+            maximumValue={100}
+            step={10}
+            value={beatPercent}
+            onValueChange={(v: number) => setBeatPercent(Math.round(v))}
+            minimumTrackTintColor="#FFD700"
+            maximumTrackTintColor="#888"
+            thumbTintColor="#FFD700"
+          />
 
           {error && (
             <ThemedText style={styles.errorText}>{error}</ThemedText>
@@ -288,5 +303,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
     marginTop: 10,
+  },
+  slider: {
+    width: '100%',
+    height: 40,
   },
 });
