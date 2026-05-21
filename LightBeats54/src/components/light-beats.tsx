@@ -108,7 +108,7 @@ export function LightBeats() {
             orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) && styles.contentLandscape,
         ]}
       >
-        <Text style={[styles.title, { color: (orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT || orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) ? '#fff' : '#FFD700' }]}>
+        <Text style={[styles.title, { color: '#FFD700' }]}>
             LightBeats
           </Text>
         <View style={[styles.amplitudeContainer, (orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT || orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) && styles.amplitudeContainerLandscape]}>
@@ -205,7 +205,7 @@ export function LightBeats() {
 
         {!cameraHasPermission && Platform.OS !== 'web' && (
           <Text style={styles.warningText}>
-            ⚠️ Se requiere permiso de cámara para usar la linterna
+             Se requiere permiso de cámara para usar la linterna
           </Text>
         )}
         </View>
@@ -228,10 +228,9 @@ const styles = StyleSheet.create({
     maxWidth: 400,
   },
   title: {
-    marginBottom: 20,
-    color: '#FFF',
+    marginBottom: 12,
     textAlign: 'center',
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
     flexShrink: 1,
     flexWrap: 'wrap',
@@ -244,8 +243,8 @@ const styles = StyleSheet.create({
   amplitudeContainerLandscape: {
     flex: 1,
     alignItems: 'center',
-    width: '50%',
-    paddingRight: 12,
+    width: '40%',
+    paddingRight: 8,
   },
   controlsContainer: {
     alignItems: 'center',
@@ -254,9 +253,9 @@ const styles = StyleSheet.create({
   },
   controlsContainerLandscape: {
     flex: 1,
-    alignItems: 'flex-start',
-    width: '50%',
-    paddingLeft: 12,
+    alignItems: 'center',
+    width: '60%',
+    paddingLeft: 8,
   },
   visualizer: {
     flexDirection: 'row',

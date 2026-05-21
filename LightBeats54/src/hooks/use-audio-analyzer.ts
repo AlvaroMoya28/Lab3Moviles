@@ -63,7 +63,7 @@ export function useAudioAnalyzer() {
 
   useEffect(() => {
     return () => {
-      // stopListening is async; call and swallow errors to avoid unhandled promise
+      
       stopListening().catch(() => {});
     };
   }, [stopListening]);
