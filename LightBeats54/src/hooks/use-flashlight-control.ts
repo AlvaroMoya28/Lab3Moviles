@@ -11,13 +11,15 @@ export function useFlashlightControl() {
   const [permission, requestPermission] = useCameraPermissions();
   const lastBeatTimeRef = useRef(0);
   const turnOffTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const minBeatIntervalMs = 100;
-  const turnOffDelayMs = 250;
+  const minBeatIntervalMs = 50;
+  const turnOffDelayMs = 200;
 
   const requestCameraPermission = async (): Promise<boolean> => {
     const response = await requestPermission();
     return response.granted;
   };
+
+  
 
   const updateFlashlightByAmplitude = (options: FlashlightControlOptions) => {
     const { amplitude, beatThreshold } = options;
@@ -43,6 +45,14 @@ export function useFlashlightControl() {
       }
     }
   };
+  useEffect(() => {
+    return () => {
+      if (turnOffTimeoutRef.current) {
+        clearTimeout(turnOffTimeoutRef.current);
+        turnOffTimeoutRef.current = null;
+      }
+    };
+  }, []);
 
   return {
     isFlashlightOn,

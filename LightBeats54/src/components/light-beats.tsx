@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
+  Text,
   Pressable,
   Animated,
   Platform,
@@ -10,12 +11,13 @@ import { CameraView } from 'expo-camera';
 import Slider from '@react-native-community/slider';
 import { useAudioAnalyzer } from '@/hooks/use-audio-analyzer';
 import { useFlashlightControl } from '@/hooks/use-flashlight-control';
-import { ThemedText } from './themed-text';
-import { ThemedView } from './themed-view';
+import { useScreenOrientation } from '@/hooks/useScreenOrientation';
+import * as ScreenOrientation from 'expo-screen-orientation';
 
-const THRESHOLD = 0.2;
+
 
 export function LightBeats() {
+  const orientation = useScreenOrientation();
   const { amplitude, isListening, error, startListening, stopListening } =
     useAudioAnalyzer();
   const { isFlashlightOn, requestCameraPermission, updateFlashlightByAmplitude } =
@@ -25,10 +27,10 @@ export function LightBeats() {
   const [cameraHasPermission, setCameraHasPermission] = useState(false);
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
   const opacityAnim = React.useRef(new Animated.Value(0.5)).current;
-  const [beatPercent, setBeatPercent] = useState(50);
+  const [beatPercent, setBeatPercent] = useState(70);
   const BEAT_THRESHOLD = beatPercent / 100;
 
-  // Inicializar permisos
+  
   useEffect(() => {
     const initPermissions = async () => {
       if (Platform.OS !== 'web') {
@@ -39,7 +41,7 @@ export function LightBeats() {
     initPermissions();
   }, [requestCameraPermission]);
 
-  // Actualizar linterna basado en amplitud
+  
   useEffect(() => {
     if (isListening) {
       updateFlashlightByAmplitude({
@@ -47,11 +49,8 @@ export function LightBeats() {
         beatThreshold: BEAT_THRESHOLD,
       });
     }
-  }, [amplitude, isListening, updateFlashlightByAmplitude]);
-
-  // Animar indicadores y loguear cambios
+  }, [amplitude, isListening, updateFlashlightByAmplitude, BEAT_THRESHOLD]);
   useEffect(() => {
-    //console.log('🔦 Linterna:', isFlashlightOn ? 'ON' : 'OFF', '| Amplitud:', amplitude.toFixed(2), '| Permisos:', cameraHasPermission);
     
     if (isFlashlightOn) {
       Animated.parallel([
@@ -90,9 +89,10 @@ export function LightBeats() {
     }
   }, [isStarted, startListening, stopListening]);
 
+  
+
   return (
-    <ThemedView style={styles.container}>
-      {/* Cámara invisible para acceso a linterna */}
+    <View style={styles.container}>
       {Platform.OS !== 'web' && cameraHasPermission && (
         <CameraView
           style={{ width: 1, height: 1, position: 'absolute',opacity : 0 }}
@@ -101,16 +101,21 @@ export function LightBeats() {
         />
       )}
 
-      <View style={styles.content}>
-        {/* Indicador de amplitud */}
-        <View style={styles.amplitudeContainer}>
-          <ThemedText type="title" style={styles.title}>
+      <View
+        style={[
+          styles.content,
+          (orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
+            orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) && styles.contentLandscape,
+        ]}
+      >
+        <Text style={[styles.title, { color: (orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT || orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) ? '#fff' : '#FFD700' }]}>
             LightBeats
-          </ThemedText>
+          </Text>
+        <View style={[styles.amplitudeContainer, (orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT || orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) && styles.amplitudeContainerLandscape]}>
+          
 
-          {/* Visualizador de amplitud */}
-          <View style={styles.visualizer}>
-            {Array.from({ length: 8 }).map((_, i) => {
+          <View style={[styles.visualizer, (orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT || orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) && styles.visualizerLandscape]}>
+            {Array.from({ length: 10 }).map((_, i) => {
               const barHeight = Math.max(
                 10,
                 Math.min(100, amplitude * 150 * (0.7 + (i % 3) * 0.15))
@@ -130,10 +135,10 @@ export function LightBeats() {
             })}
           </View>
 
-          {/* Indicador de linterna */}
           <Animated.View
             style={[
               styles.flashIndicator,
+              (orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT || orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) && styles.flashIndicatorLandscape,
               {
                 transform: [{ scale: scaleAnim }],
                 opacity: opacityAnim,
@@ -142,19 +147,19 @@ export function LightBeats() {
             ]}
           />
 
-          <ThemedText style={styles.amplitudeText}>
+          <Text style={[styles.amplitudeText, { color: (orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT || orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) ? '#fff' : '#444' }]}>
             Amplitud: {(amplitude * 100).toFixed(0)}%
-          </ThemedText>
+          </Text>
 
-          <ThemedText style={styles.amplitudeText}>
+          <Text style={[styles.amplitudeText, { color: (orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT || orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) ? '#fff' : '#444' }]}>
             Umbral: {beatPercent}%
-          </ThemedText>
+          </Text>
 
           <Slider
             style={styles.slider}
             minimumValue={0}
             maximumValue={100}
-            step={10}
+            step={5}
             value={beatPercent}
             onValueChange={(v: number) => setBeatPercent(Math.round(v))}
             minimumTrackTintColor="#FFD700"
@@ -163,11 +168,11 @@ export function LightBeats() {
           />
 
           {error && (
-            <ThemedText style={styles.errorText}>{error}</ThemedText>
+            <Text style={[styles.errorText, { color: (orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT || orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) ? '#fff' : '#ff6b6b' }]}>{error}</Text>
           )}
         </View>
 
-        {/* Botón de control */}
+        <View style={[styles.controlsContainer, (orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT || orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) && styles.controlsContainerLandscape]}>
         <Pressable
           onPress={handleToggle}
           style={[
@@ -177,38 +182,35 @@ export function LightBeats() {
               Platform.OS !== 'web' && styles.buttonDisabled,
           ]}
         >
-          <ThemedText
+          <Text
             style={[
               styles.buttonText,
               isStarted && styles.buttonTextActive,
+              { color: (orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT || orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) ? '#000' : '#fff' },
             ]}
           >
             {isStarted ? 'DETENER' : 'INICIAR'}
-          </ThemedText>
+          </Text>
         </Pressable>
 
-        {/* Estado */}
-        <ThemedText style={styles.status}>
+        <Text style={[styles.status, { color: (orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT || orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) ? '#fff' : '#000' }]}>
           {isStarted
             ? isListening
-              ? '🎵 Escuchando...'
+              ? 'Escuchando...'
               : 'Iniciando...'
-            : '⏸️ Detenido'}
-        </ThemedText>
+            : 'Detenido'}
+        </Text>
 
-        {Platform.OS === 'web' && isStarted && (
-          <ThemedText style={styles.infoText}>
-            ℹ️ Modo simulado (audio generado)
-          </ThemedText>
-        )}
+        <Text style={[styles.orientationText, { color: (orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT || orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT) ? '#fff' : '#444' }]}>Orientación: {orientation ?? 'desconocida'}</Text>
 
         {!cameraHasPermission && Platform.OS !== 'web' && (
-          <ThemedText style={styles.warningText}>
+          <Text style={styles.warningText}>
             ⚠️ Se requiere permiso de cámara para usar la linterna
-          </ThemedText>
+          </Text>
         )}
+        </View>
       </View>
-    </ThemedView>
+    </View>
   );
 }
 
@@ -227,12 +229,34 @@ const styles = StyleSheet.create({
   },
   title: {
     marginBottom: 20,
+    color: '#FFF',
     textAlign: 'center',
+    fontSize: 32,
+    fontWeight: 'bold',
+    flexShrink: 1,
+    flexWrap: 'wrap',
   },
   amplitudeContainer: {
     alignItems: 'center',
     gap: 20,
     width: '100%',
+  },
+  amplitudeContainerLandscape: {
+    flex: 1,
+    alignItems: 'center',
+    width: '50%',
+    paddingRight: 12,
+  },
+  controlsContainer: {
+    alignItems: 'center',
+    gap: 10,
+    width: '100%',
+  },
+  controlsContainerLandscape: {
+    flex: 1,
+    alignItems: 'flex-start',
+    width: '50%',
+    paddingLeft: 12,
   },
   visualizer: {
     flexDirection: 'row',
@@ -291,6 +315,8 @@ const styles = StyleSheet.create({
   status: {
     fontSize: 14,
     textAlign: 'center',
+    flexWrap: 'wrap',
+    width: '100%',
   },
   infoText: {
     color: '#0099ff',
@@ -307,5 +333,30 @@ const styles = StyleSheet.create({
   slider: {
     width: '100%',
     height: 40,
+  },
+  orientationText: {
+    fontSize: 12,
+    color: '#444',
+    marginTop: 8,
+  },
+  orientationControls: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 8,
+  },
+  contentLandscape: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 20,
+    maxWidth: 1000,
+  },
+  visualizerLandscape: {
+    height: 80,
+  },
+  flashIndicatorLandscape: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
   },
 });

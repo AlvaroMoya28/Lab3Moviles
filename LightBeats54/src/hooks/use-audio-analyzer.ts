@@ -63,9 +63,10 @@ export function useAudioAnalyzer() {
 
   useEffect(() => {
     return () => {
-      stopListening();
+      // stopListening is async; call and swallow errors to avoid unhandled promise
+      stopListening().catch(() => {});
     };
-  }, []);
+  }, [stopListening]);
 
   return { amplitude, isListening, error, startListening, stopListening };
 }
